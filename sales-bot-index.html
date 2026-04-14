@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>AI Sales Assistant — Refael.ai</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: #0a0a0f;
+      color: #e8e8ec;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 20px;
+    }
+    #app {
+      width: 100%;
+      max-width: 520px;
+      display: flex;
+      flex-direction: column;
+      height: calc(100vh - 40px);
+    }
+    #avatar-section {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 12px 0;
+      flex-shrink: 0;
+    }
+    .brand {
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: #3b82f6;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      margin-bottom: 8px;
+    }
+    #avatar-wrap {
+      width: 180px; height: 180px;
+      border-radius: 50%;
+      overflow: hidden;
+      background: #111;
+      border: 2px solid #1e293b;
+      box-shadow: 0 0 40px rgba(59,130,246,0.12);
+    }
+    #avatar-video { width: 100%; height: 100%; object-fit: cover; }
+    #status {
+      font-size: .72rem;
+      color: #555;
+      margin-top: 8px;
+      text-align: center;
+    }
+    #chat-area {
+      flex: 1;
+      overflow-y: auto;
+      padding: 12px 0;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      scrollbar-width: thin;
+      scrollbar-color: #1e293b transparent;
+    }
+    #chat-area::-webkit-scrollbar { width: 4px; }
+    #chat-area::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 4px; }
+    .msg {
+      max-width: 85%;
+      padding: 10px 14px;
+      border-radius: 16px;
+      font-size: 0.9rem;
+      line-height: 1.5;
+      word-wrap: break-word;
+      animation: fadeIn 0.3s ease;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .msg-user {
+      align-self: flex-end;
+      background: #3b82f6;
+      color: #fff;
+      border-bottom-right-radius: 4px;
+    }
+    .msg-bot {
+      align-self: flex-start;
+      background: #141420;
+      color: #c8c8d4;
+      border: 1px solid #1e2030;
+      border-bottom-left-radius: 4px;
+    }
+    .msg-bot a {
+      color: #60a5fa;
+      text-decoration: none;
+      border-bottom: 1px solid rgba(96,165,250,0.3);
+    }
+    .msg-bot a:hover { border-color: #60a5fa; }
+    .msg-bot strong { color: #e8e8ec; }
+    .msg-thinking {
+      align-self: flex-start;
+      color: #444;
+      font-style: italic;
+      padding: 8px 14px;
+      font-size: 0.82rem;
+    }
+    #chat-box {
+      display: flex;
+      gap: 8px;
+      padding: 12px 0 4px;
+      flex-shrink: 0;
+      border-top: 1px solid #141420;
+    }
+    #user-input {
+      flex: 1; padding: 12px 16px;
+      background: #0e0e18; border: 1px solid #1e2030;
+      border-radius: 999px; color: #e8e8ec; font-size: 0.9rem;
+      font-family: 'DM Sans', sans-serif;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    #user-input:focus { border-color: #3b82f6; }
+    #user-input:disabled { opacity: .3; }
+    #mic-btn {
+      width: 44px; height: 44px;
+      background: #141420;
+      border: 1px solid #1e2030;
+      border-radius: 50%;
+      color: #666;
+      font-size: 1.2rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s;
+    }
+    #mic-btn:hover { border-color: #3b82f6; color: #3b82f6; }
+    #mic-btn.recording {
+      background: #3b82f6;
+      color: #fff;
+      border-color: #3b82f6;
+      animation: pulse 1.5s infinite;
+    }
+    #mic-btn:disabled { opacity: .3; cursor: not-allowed; }
+    @keyframes pulse {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(59,130,246,0.4); }
+      50% { box-shadow: 0 0 0 10px rgba(59,130,246,0); }
+    }
+    #send-btn {
+      padding: 12px 20px; background: #3b82f6; color: #fff;
+      border: none; border-radius: 999px; font-size: 0.9rem;
+      font-family: 'DM Sans', sans-serif;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    #send-btn:hover:not(:disabled) { background: #2563eb; }
+    #send-btn:disabled { opacity: .3; cursor: not-allowed; }
+    .quick-btns {
+      display: flex; gap: 8px; flex-wrap: wrap;
+      padding: 8px 0;
+      justify-content: center;
+    }
+    .quick-btn {
+      padding: 8px 16px;
+      background: #141420;
+      border: 1px solid #1e2030;
+      border-radius: 999px;
+      color: #888;
+      font-size: 0.78rem;
+      cursor: pointer;
+      transition: all 0.2s;
+      font-family: 'DM Sans', sans-serif;
+    }
+    .quick-btn:hover { border-color: #3b82f6; color: #60a5fa; }
+  </style>
+</head>
+<body>
+
+  <div id="app">
+    <div id="avatar-section">
+      <div class="brand">Refael.ai</div>
+      <div id="avatar-wrap">
+        <video id="avatar-video" autoplay playsinline muted></video>
+      </div>
+      <div id="status">Loading...</div>
+    </div>
+    <div id="chat-area"></div>
+    <div class="quick-btns" id="quick-btns">
+      <button class="quick-btn" onclick="sendQuick('What products do you offer?')">Products</button>
+      <button class="quick-btn" onclick="sendQuick('How much does it cost?')">Pricing</button>
+      <button class="quick-btn" onclick="sendQuick('Can I see a live demo?')">Live Demo</button>
+      <button class="quick-btn" onclick="sendQuick('Book a free consultation')">Free Consultation</button>
+    </div>
+    <div id="chat-box">
+      <input id="user-input" type="text" placeholder="Type or tap 🎤 to speak…" disabled/>
+      <button id="mic-btn" disabled>🎤</button>
+      <button id="send-btn" disabled>Send</button>
+    </div>
+  </div>
+
+  <script type="module">
+    import { createAgentManager } from 'https://esm.sh/@d-id/client-sdk@1.1.53';
+
+    const AGENT_ID    = 'v2_agt_LxzjMQLP';
+    const CLIENT_KEY  = 'Z29vZ2xlLW9hdXRoMnwxMDg1MzgzODIxMDg4OTU5MjE2MzA6dUtILVVlUFhjeFNUZS1lNjV2VG5t';
+    const N8N_WEBHOOK = 'https://rafa5555.app.n8n.cloud/webhook/sales-bot/v1/chat/completions';
+
+    const videoEl   = document.getElementById('avatar-video');
+    const inputEl   = document.getElementById('user-input');
+    const btnEl     = document.getElementById('send-btn');
+    const micBtn    = document.getElementById('mic-btn');
+    const statusEl  = document.getElementById('status');
+    const chatArea  = document.getElementById('chat-area');
+    const quickBtns = document.getElementById('quick-btns');
+
+    let agentManager = null;
+    let connected    = false;
+    let stream       = null;
+    let greeted      = false;
+
+    // --- Clean text for speech ---
+    function cleanForSpeech(text) {
+      return text
+        .replace(/\*\*([^*]+)\*\*/g, '$1')
+        .replace(/\*([^*]+)\*/g, '$1')
+        .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')
+        .replace(/^[\s]*[-•*]\s*/gm, '')
+        .replace(/^[\s]*\d+\.\s*/gm, '')
+        .replace(/^#+\s*/gm, '')
+        .replace(/https?:\/\/[^\s)]+/g, '')
+        .replace(/[#*_~`|>]/g, '')
+        .replace(/\n{2,}/g, '. ')
+        .replace(/\n/g, '. ')
+        .replace(/\s{2,}/g, ' ')
+        .replace(/\.\s*\./g, '.')
+        .trim();
+    }
+
+    function shortenForVoice(text, maxChars = 300) {
+      const cleaned = cleanForSpeech(text);
+      if (cleaned.length <= maxChars) return cleaned;
+      const sentences = cleaned.split(/(?<=[.!?])\s+/);
+      let result = '';
+      for (const s of sentences) {
+        if ((result + ' ' + s).length > maxChars) break;
+        result += (result ? ' ' : '') + s;
+      }
+      if (result.length < cleaned.length) result += ' Check the chat for more details.';
+      return result || cleaned.substring(0, maxChars);
+    }
+
+    // --- Speech Recognition ---
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    let recognition = null;
+    let isRecording = false;
+
+    if (SpeechRecognition) {
+      recognition = new SpeechRecognition();
+      recognition.lang = '';
+      recognition.interimResults = true;
+      recognition.continuous = false;
+      recognition.onresult = function(e) {
+        let t = '';
+        for (let i = e.resultIndex; i < e.results.length; i++) t += e.results[i][0].transcript;
+        inputEl.value = t;
+        if (e.results[e.results.length - 1].isFinal) { stopRec(); if (t.trim()) send(); }
+      };
+      recognition.onerror = function() { stopRec(); };
+      recognition.onend = function() { stopRec(); };
+    }
+
+    function startRec() {
+      if (!recognition || isRecording) return;
+      isRecording = true;
+      micBtn.classList.add('recording');
+      micBtn.textContent = '⏹';
+      inputEl.placeholder = 'Listening...';
+      inputEl.value = '';
+      try { recognition.start(); } catch(e) { stopRec(); }
+    }
+    function stopRec() {
+      if (!isRecording) return;
+      isRecording = false;
+      micBtn.classList.remove('recording');
+      micBtn.textContent = '🎤';
+      inputEl.placeholder = 'Type or tap 🎤 to speak…';
+      try { recognition.stop(); } catch(e) {}
+    }
+    micBtn.addEventListener('click', () => { isRecording ? stopRec() : startRec(); });
+
+    // --- Core ---
+    function setStatus(s) { statusEl.textContent = s; }
+    function setReady(yes) {
+      inputEl.disabled = !yes;
+      btnEl.disabled = !yes;
+      micBtn.disabled = !yes || !recognition;
+      if (yes) inputEl.focus();
+    }
+
+    function formatReply(text) {
+      return text
+        .replace(/\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g, '<a href="$2" target="_blank">$1</a>')
+        .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
+        .replace(/\n/g, '<br>');
+    }
+
+    function addMessage(text, type) {
+      const div = document.createElement('div');
+      div.className = 'msg msg-' + type;
+      div.innerHTML = type === 'bot' ? formatReply(text) : '';
+      if (type !== 'bot') div.textContent = text;
+      chatArea.appendChild(div);
+      chatArea.scrollTop = chatArea.scrollHeight;
+    }
+
+    function removeThinking() {
+      const el = chatArea.querySelector('.msg-thinking');
+      if (el) el.remove();
+    }
+
+    function showThinking(msg) {
+      const div = document.createElement('div');
+      div.className = 'msg msg-thinking';
+      div.textContent = msg || 'Thinking...';
+      chatArea.appendChild(div);
+      chatArea.scrollTop = chatArea.scrollHeight;
+    }
+
+    function unmute() {
+      videoEl.muted = false;
+      document.removeEventListener('click', unmute);
+      document.removeEventListener('keydown', unmute);
+    }
+    document.addEventListener('click', unmute);
+    document.addEventListener('keydown', unmute);
+
+    const callbacks = {
+      onSrcObjectReady(value) {
+        stream = value;
+        videoEl.srcObject = value;
+        videoEl.muted = true;
+        videoEl.play().catch(() => {});
+      },
+      onConnectionStateChange(state) {
+        setStatus(state);
+        if (state === 'connected') {
+          connected = true;
+          setReady(true);
+          setStatus('Connected ✓');
+          if (!greeted) { greeted = true; autoGreet(); }
+        } else if (state === 'disconnected' || state === 'closed') {
+          connected = false;
+          setReady(false);
+          setTimeout(() => agentManager?.reconnect(), 3000);
+        }
+      },
+      onVideoStateChange(state) {
+        if (state === 'STOP') {
+          const idle = agentManager?.agent?.presenter?.idle_video;
+          if (idle) {
+            videoEl.srcObject = null;
+            videoEl.src = idle;
+            videoEl.loop = true;
+            videoEl.muted = false;
+            videoEl.play().catch(() => {});
+          }
+          if (connected) setStatus('Connected ✓');
+        } else {
+          videoEl.src = '';
+          videoEl.srcObject = stream;
+          videoEl.muted = false;
+          setStatus('Speaking...');
+        }
+      },
+      onError(e) {
+        console.error(e);
+        setStatus('Error: ' + (e?.message ?? JSON.stringify(e)));
+      }
+    };
+
+    function init() {
+      setStatus('Connecting...');
+      createAgentManager(AGENT_ID, {
+        auth: { type: 'key', clientKey: CLIENT_KEY },
+        callbacks,
+        streamOptions: { compatibilityMode: 'auto', streamWarmup: true }
+      }).then(m => { agentManager = m; return agentManager.connect(); })
+        .then(() => console.log('connected'))
+        .catch(e => { setStatus('Retrying...'); setTimeout(init, 5000); });
+    }
+    init();
+
+    // --- Auto greeting ---
+    async function autoGreet() {
+      // Read URL params for personalization
+      const params = new URLSearchParams(window.location.search);
+      const source = params.get('source') || '';
+      const interest = params.get('interest') || '';
+
+      let greetMsg = 'New visitor arrived on the website.';
+      if (source) greetMsg += ` They came from ${source}.`;
+      if (interest) greetMsg += ` They are interested in ${interest}.`;
+      greetMsg += ' Greet them warmly and introduce yourself. Keep it to 2 sentences.';
+
+      try {
+        const res = await fetch(N8N_WEBHOOK, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ messages: [{ role: 'user', content: greetMsg }], stream: false })
+        });
+        const data = await res.json();
+        let reply = data.reply ?? data.output ?? data.text ?? '';
+        if (reply) {
+          reply = reply.replace(/^=/, '').trim();
+          addMessage(reply, 'bot');
+          const speech = shortenForVoice(reply);
+          await agentManager.speak({ type: 'text', input: speech });
+        }
+      } catch(e) { console.error('Auto-greet failed:', e); }
+    }
+
+    // --- Send message ---
+    async function send() {
+      const text = inputEl.value.trim();
+      if (!text || !connected) return;
+      inputEl.value = '';
+      setReady(false);
+      quickBtns.style.display = 'none';
+      addMessage(text, 'user');
+      showThinking();
+      videoEl.muted = false;
+
+      try {
+        const res = await fetch(N8N_WEBHOOK, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ messages: [{ role: 'user', content: text }], stream: false })
+        });
+        const data = await res.json();
+        let reply = data.reply ?? data.output ?? data.text ?? data.message ?? data.choices?.[0]?.message?.content;
+        if (reply) reply = reply.replace(/^=/, '').trim();
+        if (!reply) throw new Error('No reply');
+
+        removeThinking();
+        addMessage(reply, 'bot');
+        const speech = shortenForVoice(reply);
+        await agentManager.speak({ type: 'text', input: speech });
+        setStatus('Speaking...');
+      } catch(e) {
+        removeThinking();
+        addMessage('Sorry, something went wrong. Please try again.', 'bot');
+        console.error(e);
+      }
+      setReady(true);
+    }
+
+    // --- Quick buttons ---
+    window.sendQuick = function(text) {
+      inputEl.value = text;
+      send();
+    };
+
+    btnEl.addEventListener('click', send);
+    inputEl.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); send(); } });
+  </script>
+</body>
+</html>
