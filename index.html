@@ -205,7 +205,9 @@
     import { createAgentManager } from 'https://esm.sh/@d-id/client-sdk@1.1.53';
 
     const AGENT_ID    = 'v2_agt_LxzjMQLP';
-    const CLIENT_KEY  = 'ZHNiZWF1dHkwMUBnbWFpbC5jb20:dwdhdSKXCjRYEfmUMtFJY';
+    // Paste ONLY the value from data-client-key here.
+    // Do NOT paste data-agent-id or any part of the embed script.
+    const CLIENT_KEY  = 'PASTE_YOUR_FULL_DID_CLIENT_KEY_HERE';
     const N8N_WEBHOOK = 'https://rafa5555.app.n8n.cloud/webhook/sales-bot/v1/chat/completions';
 
     const videoEl   = document.getElementById('avatar-video');
@@ -389,7 +391,11 @@
         streamOptions: { compatibilityMode: 'auto', streamWarmup: true }
       }).then(m => { agentManager = m; return agentManager.connect(); })
         .then(() => console.log('connected'))
-        .catch(e => { setStatus('Retrying...'); setTimeout(init, 5000); });
+        .catch(e => {
+          console.error('D-ID connection failed:', e);
+          setStatus('D-ID error - check Console');
+          setTimeout(init, 5000);
+        });
     }
     init();
 
