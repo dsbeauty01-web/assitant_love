@@ -1,0 +1,419 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>AI LOVE — ההאב</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Heebo:wght@200;300;400;500;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0a0908; --bg-2:#120f0d; --panel:#16120f;
+    --ink:#f4efe8; --ink-dim:#a39a8f; --ink-faint:#6b625a;
+    --amber:#e0a15e; --amber-deep:#b8763a; --live:#e0503c;
+    --line:rgba(224,161,94,.16); --line-soft:rgba(244,239,232,.07);
+    --mono:'IBM Plex Mono',ui-monospace,monospace;
+    --sans:'Heebo',system-ui,-apple-system,sans-serif;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{
+    background:var(--bg); color:var(--ink); font-family:var(--sans);
+    font-weight:300; -webkit-font-smoothing:antialiased;
+    min-height:100vh; overflow-x:hidden;
+  }
+  body::before{
+    content:''; position:fixed; inset:0; pointer-events:none; z-index:0;
+    background:
+      radial-gradient(ellipse 80% 50% at 50% -10%, rgba(224,161,94,.09), transparent 70%),
+      radial-gradient(ellipse 60% 40% at 50% 110%, rgba(184,118,58,.06), transparent 70%);
+  }
+  .wrap{position:relative; z-index:1; max-width:1180px; margin:0 auto; padding:0 16px 80px}
+
+  /* ---- live bar ---- */
+  .livebar{
+    display:flex; align-items:center; gap:14px; flex-wrap:wrap;
+    padding:18px 4px 16px; border-bottom:1px solid var(--line-soft);
+    font-family:var(--mono); font-size:11px; letter-spacing:.14em;
+    color:var(--ink-faint); text-transform:uppercase;
+  }
+  .rec{display:flex; align-items:center; gap:8px; color:var(--live)}
+  .dot{width:7px; height:7px; border-radius:50%; background:var(--live);
+    animation:pulse 1.9s cubic-bezier(.4,0,.6,1) infinite}
+  @keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.35;transform:scale(.8)}}
+  .livebar .sep{color:var(--ink-faint); opacity:.4}
+
+  /* ---- hero ---- */
+  header{padding:62px 0 48px; text-align:center}
+  .kicker{
+    font-family:var(--mono); font-size:10.5px; letter-spacing:.3em;
+    color:var(--amber-deep); text-transform:uppercase; margin:0 0 22px;
+  }
+  h1{
+    margin:0 0 20px; font-size:clamp(2.6rem,8vw,4.6rem); font-weight:200;
+    letter-spacing:-.02em; line-height:.98;
+  }
+  h1 em{font-style:normal; color:var(--amber); font-weight:300}
+  .sub{
+    max-width:40ch; margin:0 auto; font-size:clamp(1rem,2.4vw,1.15rem);
+    line-height:1.65; color:var(--ink-dim); font-weight:300;
+  }
+
+  /* ---- role card ---- */
+  .role{
+    margin:48px auto 0; max-width:860px; background:var(--bg-2);
+    border:1px solid var(--line); border-radius:3px; overflow:hidden;
+  }
+  .role-head{
+    display:flex; align-items:baseline; gap:14px; flex-wrap:wrap;
+    padding:22px 26px; border-bottom:1px solid var(--line-soft);
+    background:linear-gradient(180deg,rgba(224,161,94,.05),transparent);
+  }
+  .role-head .tag{
+    font-family:var(--mono); font-size:10px; letter-spacing:.22em;
+    color:var(--amber-deep); text-transform:uppercase;
+  }
+  .role-head .who{font-size:1.5rem; font-weight:400; letter-spacing:-.01em}
+  .role-head .age{color:var(--ink-faint); font-size:.95rem}
+  .role-note{
+    padding:16px 26px; font-size:.9rem; color:var(--ink-dim);
+    line-height:1.6; border-bottom:1px solid var(--line-soft);
+  }
+  ol.facts{
+    margin:0; padding:10px 0; list-style:none; counter-reset:f;
+  }
+  ol.facts li{
+    counter-increment:f; display:flex; gap:16px; align-items:flex-start;
+    padding:11px 26px; font-size:.97rem; line-height:1.55; color:var(--ink);
+  }
+  ol.facts li::before{
+    content:counter(f,decimal-leading-zero);
+    font-family:var(--mono); font-size:10px; color:var(--amber-deep);
+    padding-top:5px; flex:0 0 auto; opacity:.75;
+  }
+  ol.facts li:nth-child(odd){background:rgba(244,239,232,.015)}
+
+  /* ---- the button ---- */
+  .stage{margin:52px auto 0; max-width:860px; text-align:center}
+  .orb-wrap{position:relative; display:inline-block; margin-bottom:26px}
+  .orb{
+    width:132px; height:132px; border-radius:50%; border:none; cursor:pointer;
+    background:radial-gradient(circle at 38% 32%, #f0bd82, var(--amber-deep) 62%, #7d4a1f);
+    box-shadow:0 0 0 1px rgba(224,161,94,.3), 0 0 56px rgba(224,161,94,.26);
+    font-family:var(--sans); font-size:1rem; font-weight:400; color:#1a1006;
+    transition:transform .22s cubic-bezier(.34,1.3,.64,1), box-shadow .3s;
+    display:grid; place-items:center; padding:0;
+  }
+  .orb:hover{transform:scale(1.04); box-shadow:0 0 0 1px rgba(224,161,94,.5), 0 0 76px rgba(224,161,94,.38)}
+  .orb:active{transform:scale(.98)}
+  .orb:disabled{cursor:default; opacity:.55}
+  .orb.listening{
+    background:radial-gradient(circle at 38% 32%, #fff1dd, var(--amber) 58%, var(--amber-deep));
+    animation:breathe 2.6s ease-in-out infinite;
+  }
+  .orb.speaking{animation:speak .85s ease-in-out infinite}
+  @keyframes breathe{0%,100%{box-shadow:0 0 0 1px rgba(224,161,94,.5),0 0 60px rgba(224,161,94,.3)}
+    50%{box-shadow:0 0 0 1px rgba(224,161,94,.7),0 0 110px rgba(224,161,94,.55)}}
+  @keyframes speak{0%,100%{transform:scale(1)}50%{transform:scale(1.045)}}
+  .status{
+    font-family:var(--mono); font-size:11px; letter-spacing:.16em;
+    color:var(--ink-faint); text-transform:uppercase; min-height:16px;
+  }
+  .hint{margin-top:10px; font-size:.88rem; color:var(--ink-faint)}
+
+  /* ---- control room ---- */
+  .control{
+    margin:76px auto 0; max-width:1000px; background:#0d0b09;
+    border:1px solid var(--line-soft); border-radius:3px;
+  }
+  .control-head{
+    display:flex; align-items:center; justify-content:space-between; gap:14px;
+    flex-wrap:wrap; padding:17px 22px; border-bottom:1px solid var(--line-soft);
+  }
+  .control-head h2{
+    margin:0; font-family:var(--mono); font-size:11px; letter-spacing:.2em;
+    color:var(--ink-dim); text-transform:uppercase; font-weight:500;
+  }
+  .control-head .note{font-family:var(--mono); font-size:10px; color:var(--ink-faint)}
+  .grid{display:grid; grid-template-columns:1fr 1fr; gap:0}
+  @media (max-width:760px){.grid{grid-template-columns:1fr}}
+  .bank{padding:22px; border-left:1px solid var(--line-soft)}
+  .grid .bank:first-child{border-left:none}
+  @media (max-width:760px){.bank{border-left:none; border-top:1px solid var(--line-soft)}
+    .grid .bank:first-child{border-top:none}}
+  .bank h3{
+    margin:0 0 6px; font-family:var(--mono); font-size:10px; letter-spacing:.18em;
+    text-transform:uppercase; font-weight:500;
+  }
+  .bank.cam h3{color:#6f9bb5}
+  .bank.dir h3{color:var(--amber-deep)}
+  .bank p{margin:0 0 16px; font-size:.84rem; color:var(--ink-faint); line-height:1.55}
+  .chips{display:flex; flex-wrap:wrap; gap:7px}
+  .chip{
+    font-family:var(--sans); font-size:.88rem; font-weight:400; cursor:pointer;
+    padding:8px 14px; border-radius:2px; color:var(--ink-dim);
+    background:transparent; border:1px solid var(--line-soft);
+    transition:all .16s ease;
+  }
+  .chip:hover:not(:disabled){color:var(--ink); border-color:rgba(244,239,232,.22)}
+  .chip:disabled{opacity:.3; cursor:default}
+  .bank.cam .chip:hover:not(:disabled){border-color:rgba(111,155,181,.5); background:rgba(111,155,181,.07)}
+  .bank.dir .chip:hover:not(:disabled){border-color:rgba(224,161,94,.45); background:rgba(224,161,94,.07)}
+  .chip.fired{animation:fire .5s ease}
+  @keyframes fire{0%{background:rgba(224,161,94,.3)}100%{background:transparent}}
+
+  /* ---- feed ---- */
+  .feed{
+    border-top:1px solid var(--line-soft); padding:18px 22px 22px;
+    font-family:var(--mono); font-size:11.5px; line-height:1.9;
+    max-height:190px; overflow-y:auto; color:var(--ink-faint);
+  }
+  .feed:empty::after{content:'— ממתין —'; opacity:.4}
+  .feed div{display:flex; gap:10px}
+  .feed .t{opacity:.45; flex:0 0 auto}
+  .feed .cam{color:#6f9bb5}
+  .feed .dir{color:var(--amber)}
+  .feed .sys{color:var(--ink-faint)}
+
+  footer{
+    margin:58px auto 0; max-width:1000px; padding-top:22px;
+    border-top:1px solid var(--line-soft);
+    font-family:var(--mono); font-size:10px; letter-spacing:.12em;
+    color:var(--ink-faint); text-transform:uppercase;
+    display:flex; justify-content:space-between; gap:14px; flex-wrap:wrap;
+  }
+  .err{
+    margin:18px auto 0; max-width:860px; padding:14px 18px;
+    border:1px solid rgba(224,80,60,.3); background:rgba(224,80,60,.07);
+    border-radius:2px; font-size:.9rem; color:#f0a89c; display:none;
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="livebar">
+    <span class="rec"><span class="dot"></span>שידור חי</span>
+    <span class="sep">/</span>
+    <span>מצלמה 1 · ההאב</span>
+    <span class="sep">/</span>
+    <span>פרק 1 — ההיכרות הראשונה</span>
+  </div>
+
+  <header>
+    <p class="kicker">AI LOVE · הדגמה</p>
+    <h1>אתה על <em>המצלמה</em>.</h1>
+    <p class="sub">
+      בעוד רגע תשמע את סולמייט בפעם הראשונה.
+      היא תוחקרה עליך לפני שנכנסת. היא יודעת עשרה דברים.
+    </p>
+  </header>
+
+  <section class="role">
+    <div class="role-head">
+      <span class="tag">התפקיד שלך</span>
+      <span class="who">אבי שלו</span>
+      <span class="age">בן 41</span>
+    </div>
+    <p class="role-note">
+      קרא את העשר. אל תספר לה אותם — היא כבר יודעת.
+      היא תשתמש בשניים לכל היותר, והיא לא תגיד לך באיזה.
+    </p>
+    <ol class="facts">
+      <li>התגרש לפני שלוש שנים אחרי אחת־עשרה שנות נישואים. אומר שזה היה בהסכמה.</li>
+      <li>בת בת תשע, נועה. איתו כל סוף שבוע שני.</li>
+      <li>תפקיד בכיר בחברת מדיה. שתים־עשרה שעות ביום, ואומר שהוא אוהב את זה.</li>
+      <li>מתקשר לאמא שלו כל יום שישי. הם מדברים על מזג האוויר.</li>
+      <li>לא היה בדייט שני כבר שנתיים.</li>
+      <li>קונה ספרים כל הזמן. לא מסיים אף אחד.</li>
+      <li>האקס שלו התחתנה שוב בשנה שעברה. הוא גילה בפייסבוק.</li>
+      <li>רץ עשרה קילומטר שלוש פעמים בשבוע. התחיל אחרי הגירושים.</li>
+      <li>אומר לכולם שהוא לא מחפש משהו רציני.</li>
+      <li>שומר תמונה של שלושתם מלפני, במגירה.</li>
+    </ol>
+  </section>
+
+  <div class="err" id="err"></div>
+
+  <section class="stage">
+    <div class="orb-wrap">
+      <button class="orb" id="orb">לחץ ודבר</button>
+    </div>
+    <p class="status" id="status">מוכן</p>
+    <p class="hint" id="hint">צריך מיקרופון. דבר רגיל — היא לא תחתוך אותך.</p>
+  </section>
+
+  <section class="control">
+    <div class="control-head">
+      <h2>חדר הבקרה</h2>
+      <span class="note">נשלח ל־LLM · לא נשמע לאבי</span>
+    </div>
+    <div class="grid">
+      <div class="bank cam">
+        <h3>מה המצלמה רואה</h3>
+        <p>שכבת הזיהוי. בגרסה המלאה — ראייה ממוחשבת. כאן נשלח ידנית.
+           היא מגיבה לגוף, לא מכריזה עליו.</p>
+        <div class="chips" id="cams"></div>
+      </div>
+      <div class="bank dir">
+        <h3>הזרקת במאי</h3>
+        <p>הפקה חיה מכוונת את הדרמה בזמן אמת.
+           היא מצייתת מבלי לצאת מהדמות ומבלי להזכיר שקיבלה הוראה.</p>
+        <div class="chips" id="dirs"></div>
+      </div>
+    </div>
+    <div class="feed" id="feed"></div>
+  </section>
+
+  <footer>
+    <span>Refael.ai · הדגמה טכנית</span>
+    <span>קול: ElevenLabs v4 Turbo · עברית</span>
+  </footer>
+</div>
+
+<script src="https://unpkg.com/@elevenlabs/client@1.30.0/dist/lib.iife.js"></script>
+<script>
+(function(){
+  "use strict";
+  var AGENT_ID = "agent_5701m6qdcktme3a9ye6xwestr4xd";
+
+  var CAMS = [
+    ["מחייך",        "[מצלמה] הוא מחייך. נראה נינוח."],
+    ["נרגש",         "[מצלמה] הוא נרגש. הידיים זזות, הנשימה קצרה."],
+    ["דומע",         "[מצלמה] העיניים שלו לחות. הוא מנסה להסתיר."],
+    ["נמנע ממבט",    "[מצלמה] הוא מסתכל הצידה. מתחמק מהמבט."],
+    ["שתק",          "[מצלמה] הוא שותק כבר כמה שניות. לא מחפש מילים — מרגיש משהו."],
+    ["נשען אחורה",   "[מצלמה] הוא נשען אחורה בכיסא. סוגר ידיים."],
+    ["צוחק במבוכה",  "[מצלמה] הוא צוחק, אבל זה צחוק של מבוכה."]
+  ];
+  var DIRS = [
+    ["העלי מתח",     "[במאי] העלי מתח. שאלי את הגרסה הקשה יותר של מה שתכננת."],
+    ["רכי אותו",     "[במאי] רכי אותו. תני לו משהו קל."],
+    ["הוא משקר",     "[במאי] הוא לא אומר אמת. אל תאשימי — שאלי מצד אחר."],
+    ["שאלי על האקס", "[במאי] הגיעי לאקס שלו. בצעד אחד, בטבעיות."],
+    ["שאלי על הבת",  "[במאי] הגיעי לבת שלו."],
+    ["שתקי",         "[במאי] אל תשאלי כלום בתור הבא. תני לשתיקה לעבוד."],
+    ["סיימי",        "[במאי] סיימי. משפט אחד, חם, ואז תפסיקי לשאול."]
+  ];
+
+  var orb    = document.getElementById("orb");
+  var status = document.getElementById("status");
+  var hint   = document.getElementById("hint");
+  var feed   = document.getElementById("feed");
+  var errBox = document.getElementById("err");
+  var conv = null, connecting = false;
+
+  function log(kind, text){
+    var row = document.createElement("div");
+    var t = document.createElement("span");
+    t.className = "t";
+    t.textContent = new Date().toLocaleTimeString("he-IL",{hour:"2-digit",minute:"2-digit",second:"2-digit"});
+    var m = document.createElement("span");
+    m.className = kind;
+    m.textContent = text;
+    row.appendChild(t); row.appendChild(m);
+    feed.appendChild(row);
+    feed.scrollTop = feed.scrollHeight;
+  }
+  function showErr(msg){ errBox.textContent = msg; errBox.style.display = "block"; }
+  function setChips(on){
+    var all = document.querySelectorAll(".chip");
+    for (var i=0;i<all.length;i++) all[i].disabled = !on;
+  }
+
+  function buildChips(hostId, rows, cls){
+    var host = document.getElementById(hostId);
+    rows.forEach(function(r){
+      var b = document.createElement("button");
+      b.className = "chip";
+      b.type = "button";
+      b.textContent = r[0];
+      b.disabled = true;
+      b.addEventListener("click", function(){
+        if (!conv) return;
+        try {
+          conv.sendContextualUpdate(r[1]);
+          log(cls, r[1]);
+          b.classList.add("fired");
+          setTimeout(function(){ b.classList.remove("fired"); }, 500);
+        } catch(e){ log("sys", "שליחה נכשלה: " + e.message); }
+      });
+      host.appendChild(b);
+    });
+  }
+  buildChips("cams", CAMS, "cam");
+  buildChips("dirs", DIRS, "dir");
+
+  function stop(){
+    if (conv) { try { conv.endSession(); } catch(e){} }
+    conv = null;
+    orb.textContent = "לחץ ודבר";
+    orb.className = "orb";
+    orb.disabled = false;
+    status.textContent = "הסתיים";
+    setChips(false);
+  }
+
+  orb.addEventListener("click", function(){
+    if (conv) { stop(); log("sys","השיחה הסתיימה"); return; }
+    if (connecting) return;
+
+    if (!window.ElevenLabsClient || !window.ElevenLabsClient.Conversation){
+      showErr("ספריית הקול לא נטענה. בדוק חיבור לאינטרנט ורענן.");
+      return;
+    }
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia){
+      showErr("הדפדפן חוסם מיקרופון. פתח את העמוד דרך https או localhost, לא כקובץ מקומי.");
+      return;
+    }
+
+    connecting = true;
+    orb.disabled = true;
+    status.textContent = "מתחבר";
+    errBox.style.display = "none";
+
+    navigator.mediaDevices.getUserMedia({audio:true}).then(function(){
+      return window.ElevenLabsClient.Conversation.startSession({
+        agentId: AGENT_ID,
+        connectionType: "webrtc",
+        onConnect: function(){
+          connecting = false;
+          orb.disabled = false;
+          orb.textContent = "סיים";
+          orb.className = "orb listening";
+          status.textContent = "מחוברת";
+          hint.textContent = "חדר הבקרה פעיל. לחץ על כפתור — היא תגיב, בלי להזכיר אותו.";
+          setChips(true);
+          log("sys","השיחה התחילה");
+        },
+        onDisconnect: function(){ stop(); },
+        onModeChange: function(m){
+          var mode = m && m.mode;
+          if (mode === "speaking"){ orb.className = "orb listening speaking"; status.textContent = "היא מדברת"; }
+          else { orb.className = "orb listening"; status.textContent = "מקשיבה"; }
+        },
+        onError: function(e){
+          connecting = false;
+          var msg = (e && (e.message || e)) || "שגיאה לא ידועה";
+          showErr("שגיאה: " + msg);
+          log("sys","שגיאה: " + msg);
+          stop();
+        }
+      });
+    }).then(function(c){
+      conv = c;
+    }).catch(function(e){
+      connecting = false;
+      orb.disabled = false;
+      status.textContent = "מוכן";
+      var msg = (e && (e.name === "NotAllowedError"))
+        ? "המיקרופון נחסם. אשר גישה בדפדפן ונסה שוב."
+        : ("לא הצלחתי להתחבר: " + ((e && e.message) || e));
+      showErr(msg);
+    });
+  });
+})();
+</script>
+</body>
+</html>
