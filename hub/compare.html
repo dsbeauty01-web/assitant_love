@@ -1,0 +1,196 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache"><meta http-equiv="Expires" content="0">
+<title>AI LOVE — השוואה</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Heebo:wght@200;300;400;500;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0a0908;--bg-2:#120f0d;--ink:#f4efe8;--ink-dim:#a39a8f;--ink-faint:#6b625a;
+    --amber:#e0a15e;--amber-deep:#b8763a;--live:#e0503c;
+    --sassy:#d96a9c;--emo:#6f9bb5;
+    --line-soft:rgba(244,239,232,.08);--mono:'IBM Plex Mono',monospace;--sans:'Heebo',sans-serif;
+  }
+  *{box-sizing:border-box}html,body{margin:0;padding:0}
+  body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-weight:300;
+    -webkit-font-smoothing:antialiased;min-height:100vh;overflow-x:hidden}
+  body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
+    background:radial-gradient(ellipse 80% 50% at 50% -10%,rgba(224,161,94,.08),transparent 70%)}
+  .wrap{position:relative;z-index:1;max-width:700px;margin:0 auto;padding:0 16px 70px}
+  .livebar{display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:16px 2px;
+    border-bottom:1px solid var(--line-soft);font-family:var(--mono);font-size:10.5px;
+    letter-spacing:.14em;color:var(--ink-faint);text-transform:uppercase}
+  .rec{display:flex;align-items:center;gap:7px;color:var(--live)}
+  .dot{width:7px;height:7px;border-radius:50%;background:var(--live);animation:pulse 1.9s infinite}
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
+  header{padding:40px 0 26px;text-align:center}
+  .kicker{font-family:var(--mono);font-size:10px;letter-spacing:.3em;color:var(--amber-deep);
+    text-transform:uppercase;margin:0 0 16px}
+  h1{margin:0 0 12px;font-size:clamp(2rem,7vw,3rem);font-weight:200;letter-spacing:-.02em}
+  h1 em{font-style:normal;color:var(--amber);font-weight:300}
+  .sub{max-width:34ch;margin:0 auto;font-size:1rem;line-height:1.6;color:var(--ink-dim)}
+  .pick{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:34px 0 10px}
+  .opt{padding:20px 16px;border-radius:4px;border:1px solid var(--line-soft);background:var(--bg-2);
+    cursor:pointer;text-align:center;transition:all .18s}
+  .opt .nm{font-size:1.3rem;font-weight:400;margin-bottom:5px}
+  .opt .ds{font-size:.82rem;color:var(--ink-faint);line-height:1.5}
+  .opt.sassy.on{border-color:var(--sassy);background:rgba(217,106,156,.1);box-shadow:0 0 30px rgba(217,106,156,.15)}
+  .opt.emo.on{border-color:var(--emo);background:rgba(111,155,181,.1);box-shadow:0 0 30px rgba(111,155,181,.15)}
+  .opt.sassy .nm{color:var(--sassy)}.opt.emo .nm{color:var(--emo)}
+  .stage{text-align:center;margin:26px 0 0}
+  .orb{width:120px;height:120px;border-radius:50%;border:none;cursor:pointer;
+    background:radial-gradient(circle at 38% 32%,#f0bd82,var(--amber-deep) 62%,#7d4a1f);
+    box-shadow:0 0 0 1px rgba(224,161,94,.3),0 0 50px rgba(224,161,94,.25);
+    font-family:var(--sans);font-size:1rem;color:#1a1006;display:grid;place-items:center;
+    margin:0 auto 18px;transition:transform .2s,box-shadow .3s}
+  .orb:hover:not(:disabled){transform:scale(1.04)}.orb:disabled{opacity:.5;cursor:default}
+  .orb.on{animation:breathe 2.6s ease-in-out infinite}
+  .orb.talking{animation:speak .85s ease-in-out infinite}
+  @keyframes breathe{0%,100%{box-shadow:0 0 0 1px rgba(224,161,94,.5),0 0 55px rgba(224,161,94,.3)}
+    50%{box-shadow:0 0 0 1px rgba(224,161,94,.7),0 0 95px rgba(224,161,94,.5)}}
+  @keyframes speak{0%,100%{transform:scale(1)}50%{transform:scale(1.045)}}
+  .status{font-family:var(--mono);font-size:11px;letter-spacing:.14em;color:var(--ink-faint);
+    text-transform:uppercase;min-height:15px}
+  .hint{margin-top:9px;font-size:.85rem;color:var(--ink-faint)}
+  .control{margin:34px 0 0;background:#0d0b09;border:1px solid var(--line-soft);border-radius:4px}
+  .ctitle{padding:14px 18px;font-family:var(--mono);font-size:10px;letter-spacing:.2em;
+    color:var(--ink-dim);text-transform:uppercase;border-bottom:1px solid var(--line-soft);
+    display:flex;justify-content:space-between}
+  .bank{padding:16px 18px}
+  .bank h3{margin:0 0 9px;font-family:var(--mono);font-size:9.5px;letter-spacing:.18em;
+    text-transform:uppercase;font-weight:500}
+  .bank.cam h3{color:var(--emo)}.bank.dir h3{color:var(--amber-deep)}
+  .bank.dir{border-top:1px solid var(--line-soft)}
+  .chips{display:flex;flex-wrap:wrap;gap:6px}
+  .chip{font-family:var(--sans);font-size:.85rem;cursor:pointer;padding:7px 12px;border-radius:2px;
+    color:var(--ink-dim);background:transparent;border:1px solid var(--line-soft);transition:all .15s}
+  .chip:hover:not(:disabled){color:var(--ink)}.chip:disabled{opacity:.3;cursor:default}
+  .chip.fired{animation:fire .6s ease}@keyframes fire{0%{background:rgba(224,161,94,.3)}100%{background:transparent}}
+  .err{margin:16px 0 0;padding:12px 16px;border:1px solid rgba(224,80,60,.3);
+    background:rgba(224,80,60,.07);border-radius:3px;font-size:.88rem;color:#f0a89c;display:none}
+  footer{margin:40px 0 0;padding-top:18px;border-top:1px solid var(--line-soft);
+    font-family:var(--mono);font-size:10px;letter-spacing:.1em;color:var(--ink-faint);
+    text-transform:uppercase;text-align:center}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="livebar">
+    <span class="rec"><span class="dot"></span>שידור חי</span>
+    <span>·</span><span>מוקלט</span><span>·</span><span>Opus 5</span>
+  </div>
+
+  <header>
+    <p class="kicker">AI LOVE · השוואת גרסאות</p>
+    <h1>שתי <em>סולמייט</em>.</h1>
+    <p class="sub">אותו מוח (Opus 5), אותו קול. אופי שונה. בחר, דבר, השווה.</p>
+  </header>
+
+  <div class="pick">
+    <div class="opt sassy on" id="opt-sassy" data-v="sassy">
+      <div class="nm">סאסית</div>
+      <div class="ds">חדה, שנונה, מתגרה. חום עם שיניים.</div>
+    </div>
+    <div class="opt emo" id="opt-emo" data-v="emotional">
+      <div class="nm">רגשית</div>
+      <div class="ds">חמה, רכה, מקשיבה עמוק. מרגישה איתך.</div>
+    </div>
+  </div>
+
+  <div class="err" id="err"></div>
+
+  <div class="stage">
+    <button class="orb" id="orb">לחץ ודבר</button>
+    <p class="status" id="status">נבחרה: סאסית</p>
+    <p class="hint" id="hint">בחר גרסה למעלה, לחץ, אשר מיקרופון. דבר איתה דקה והחלף.</p>
+  </div>
+
+  <div class="control">
+    <div class="ctitle"><span>חדר הבקרה</span><span>לא נשמע לאבי</span></div>
+    <div class="bank cam"><h3>מה המצלמה רואה</h3><div class="chips" id="cams"></div></div>
+    <div class="bank dir"><h3>הזרקת במאי</h3><div class="chips" id="dirs"></div></div>
+  </div>
+
+  <footer>Refael.ai · build 10 · סאסית מול רגשית</footer>
+</div>
+
+<script src="https://unpkg.com/@elevenlabs/client@1.30.0/dist/lib.iife.js"></script>
+<script>
+(function(){
+  "use strict";
+  var AGENTS={sassy:"agent_2901m6z66kqrfzkszym69q8h2sah",emotional:"agent_3601m6z66n15efkstd0gd1vcsm1q"};
+  var NAMES={sassy:"סאסית",emotional:"רגשית"};
+  var chosen="sassy", conv=null, connecting=false;
+
+  var CAMS=[["מחייך","[מצלמה] הוא מחייך. נינוח."],["נרגש","[מצלמה] הוא נרגש, הנשימה קצרה."],
+    ["דומע","[מצלמה] העיניים שלו לחות."],["נמנע ממבט","[מצלמה] הוא מתחמק מהמבט."],
+    ["שתק","[מצלמה] הוא שותק, מרגיש משהו."],["נשען אחורה","[מצלמה] הוא נשען אחורה, סוגר."]];
+  var DIRS=[["העלי מתח","[במאי] העלי מתח. הגרסה הקשה יותר."],["רכי אותו","[במאי] רכי אותו, משהו קל."],
+    ["הוא משקר","[במאי] הוא לא אומר אמת. מצד אחר."],["שאלי על האקס","[במאי] הגיעי לאקס בצעד אחד."],
+    ["שאלי על הבת","[במאי] הגיעי לבת שלו."],["סיימי","[במאי] סיימי. משפט חם אחד, ואז עצרי."]];
+
+  var orb=document.getElementById("orb"),status=document.getElementById("status"),
+      hint=document.getElementById("hint"),errB=document.getElementById("err");
+  function showErr(m){errB.textContent=m;errB.style.display="block";}
+  function setChips(on){var a=document.querySelectorAll(".chip");for(var i=0;i<a.length;i++)a[i].disabled=!on;}
+
+  function pick(v){
+    if(conv) return; // can't switch mid-call
+    chosen=v;
+    document.getElementById("opt-sassy").classList.toggle("on",v==="sassy");
+    document.getElementById("opt-emo").classList.toggle("on",v==="emotional");
+    status.textContent="נבחרה: "+NAMES[v];
+  }
+  document.getElementById("opt-sassy").addEventListener("click",function(){pick("sassy");});
+  document.getElementById("opt-emo").addEventListener("click",function(){pick("emotional");});
+
+  function build(hostId,rows,cls){
+    var h=document.getElementById(hostId);
+    rows.forEach(function(r){
+      var b=document.createElement("button");b.className="chip";b.type="button";b.textContent=r[0];b.disabled=true;
+      b.addEventListener("click",function(){
+        if(!conv)return;
+        try{conv.sendContextualUpdate(r[1]);b.classList.add("fired");setTimeout(function(){b.classList.remove("fired");},600);}catch(e){}
+      });
+      h.appendChild(b);
+    });
+  }
+  build("cams",CAMS,"cam");build("dirs",DIRS,"dir");
+
+  function stop(){
+    if(conv){try{conv.endSession();}catch(e){}}
+    conv=null;orb.textContent="לחץ ודבר";orb.className="orb";orb.disabled=false;
+    status.textContent="נבחרה: "+NAMES[chosen];setChips(false);
+  }
+
+  orb.addEventListener("click",function(){
+    if(conv){stop();return;}
+    if(connecting)return;
+    if(!window.ElevenLabsClient||!window.ElevenLabsClient.Conversation){showErr("ספריית הקול לא נטענה. רענן.");return;}
+    if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia){showErr("הדפדפן חוסם מיקרופון. פתח דרך https.");return;}
+    connecting=true;orb.disabled=true;status.textContent="מתחבר ל"+NAMES[chosen];errB.style.display="none";
+    navigator.mediaDevices.getUserMedia({audio:true}).then(function(){
+      return window.ElevenLabsClient.Conversation.startSession({
+        agentId:AGENTS[chosen],connectionType:"webrtc",
+        onConnect:function(){connecting=false;orb.disabled=false;orb.textContent="סיים";orb.className="orb on";
+          status.textContent=NAMES[chosen]+" — מחוברת";hint.textContent="חדר הבקרה פעיל. דבר, ואז סיים והחלף גרסה.";setChips(true);},
+        onDisconnect:function(){stop();},
+        onModeChange:function(m){var md=m&&m.mode;
+          if(md==="speaking"){orb.className="orb on talking";status.textContent=NAMES[chosen]+" מדברת";}
+          else{orb.className="orb on";status.textContent=NAMES[chosen]+" מקשיבה";}},
+        onError:function(e){connecting=false;showErr("שגיאה: "+((e&&(e.message||e))||"לא ידוע"));stop();}
+      });
+    }).then(function(c){conv=c;}).catch(function(e){
+      connecting=false;orb.disabled=false;status.textContent="נבחרה: "+NAMES[chosen];
+      showErr((e&&e.name==="NotAllowedError")?"המיקרופון נחסם. אשר גישה ונסה שוב.":"לא הצלחתי להתחבר.");
+    });
+  });
+})();
+</script>
+</body>
+</html>
