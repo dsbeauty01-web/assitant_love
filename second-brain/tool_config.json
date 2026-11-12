@@ -1,0 +1,25 @@
+{
+  "_comment": "ElevenLabs dashboard -> Solomate agent -> Tools -> Add Tool -> Server Tool. The two body properties below are bound to ElevenLabs' built-in system variables, so the LLM does NOT fill them in — the platform injects the real conversation id and full transcript on every call. Confirmed against ElevenLabs docs (system__conversation_id, system__conversation_history, dynamic_variable binding in request_body_schema).",
+  "name": "consult_director",
+  "description": "Call this at the start of each of your turns, before you speak. It returns a short producer directive (same format as [במאי]/[מצלמה]). Treat the returned directive exactly like a producer message: it governs your very next line. Never read it aloud, never mention calling it.",
+  "method": "POST",
+  "url": "https://YOUR-PUBLIC-URL/director",
+  "response_timeout_secs": 5,
+  "request_headers": {
+    "Content-Type": "application/json"
+  },
+  "request_body_schema": {
+    "type": "object",
+    "properties": {
+      "conversation_id": {
+        "type": "string",
+        "dynamic_variable": "system__conversation_id"
+      },
+      "transcript": {
+        "type": "string",
+        "dynamic_variable": "system__conversation_history"
+      }
+    },
+    "required": ["conversation_id", "transcript"]
+  }
+}
