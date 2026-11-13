@@ -45,6 +45,17 @@ laptop sleeping.)
 4. Keep your existing `[במאי]`/`[מצלמה]` button rules. This just adds a second,
    automatic source of the same kind of instruction.
 
+## Deploy to Render (free) — replaces the ngrok step
+1. render.com -> New -> Blueprint -> pick this repo. It reads `second-brain/render.yaml`
+   (set Root Directory to `second-brain` if asked).
+2. When asked, paste `ANTHROPIC_API_KEY` and make up a long random `DIRECTOR_TOKEN`.
+3. Check `https://YOUR-APP.onrender.com/health` shows `"has_key": true`.
+4. In ElevenLabs tool config: set the URL, and add a request header
+   `X-Director-Token` with the same token.
+5. In `hub/compare.html`, set `var DIRECTOR_URL="https://YOUR-APP.onrender.com";`
+   then push. A "המוח השני" panel appears under the control room and shows each
+   directive live. Free tier sleeps after idle, so open `/health` once before a demo.
+
 ## What's real vs. what's still work
 **Real:** the architecture, the producer logic (gender-lock, dead-thread
 escalation, anti-interrogation, emotion), correct ElevenLabs wiring, a test you

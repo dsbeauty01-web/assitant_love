@@ -73,6 +73,18 @@
   .chip.fired{animation:fire .6s ease}@keyframes fire{0%{background:rgba(224,161,94,.3)}100%{background:transparent}}
   .err{margin:16px 0 0;padding:12px 16px;border:1px solid rgba(224,80,60,.3);
     background:rgba(224,80,60,.07);border-radius:3px;font-size:.88rem;color:#f0a89c;display:none}
+  .brain{display:none;margin:18px 0 0;background:#0d0b09;border:1px solid var(--line-soft);border-radius:4px}
+  .brain.show{display:block}
+  .brain .ctitle{color:var(--amber-deep)}
+  .bstate{padding:12px 18px;font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;
+    color:var(--ink-faint);border-bottom:1px solid var(--line-soft);display:flex;gap:16px;flex-wrap:wrap}
+  .blist{list-style:none;margin:0;padding:6px 18px 12px;max-height:230px;overflow-y:auto}
+  .blist li{padding:8px 0;border-bottom:1px solid var(--line-soft);font-size:.92rem;
+    display:flex;gap:10px;align-items:baseline}
+  .blist li:last-child{border-bottom:none}
+  .blist .tn{font-family:var(--mono);font-size:10px;color:var(--ink-faint);min-width:26px}
+  .blist .quiet{color:var(--ink-faint)}.blist .act{color:var(--amber)}
+  .bempty{padding:14px 18px;font-size:.85rem;color:var(--ink-faint)}
   footer{margin:40px 0 0;padding-top:18px;border-top:1px solid var(--line-soft);
     font-family:var(--mono);font-size:10px;letter-spacing:.1em;color:var(--ink-faint);
     text-transform:uppercase;text-align:center}
@@ -116,6 +128,13 @@
     <div class="bank dir"><h3>הזרקת במאי</h3><div class="chips" id="dirs"></div></div>
   </div>
 
+  <div class="brain" id="brain">
+    <div class="ctitle"><span>המוח השני</span><span>המפיק השקט</span></div>
+    <div class="bstate" id="bstate"></div>
+    <div class="bempty" id="bempty">מחכה לתור הראשון…</div>
+    <ul class="blist" id="blist"></ul>
+  </div>
+
   <footer>Refael.ai · build 10 · סאסית מול רגשית</footer>
 </div>
 
@@ -126,6 +145,9 @@
   var AGENTS={sassy:"agent_2901m6z66kqrfzkszym69q8h2sah",emotional:"agent_3601m6z66n15efkstd0gd1vcsm1q"};
   var NAMES={sassy:"סאסית",emotional:"רגשית"};
   var chosen="sassy", conv=null, connecting=false;
+  // Public URL of second-brain/director.py (e.g. https://second-brain.onrender.com). Empty = panel hidden.
+  var DIRECTOR_URL="";
+  var brainTimer=null;
 
   var CAMS=[["מחייך","[מצלמה] הוא מחייך. נינוח."],["נרגש","[מצלמה] הוא נרגש, הנשימה קצרה."],
     ["דומע","[מצלמה] העיניים שלו לחות."],["נמנע ממבט","[מצלמה] הוא מתחמק מהמבט."],
@@ -162,7 +184,33 @@
   }
   build("cams",CAMS,"cam");build("dirs",DIRS,"dir");
 
+  var brain=document.getElementById("brain"),blist=document.getElementById("blist"),
+      bstate=document.getElementById("bstate"),bempty=document.getElementById("bempty");
+  function renderBrain(d){
+    var h=d.history||[];
+    bstate.textContent="מגדר: "+(d.gender||"לא נקבע")+"   ·   שרשראות שנסגרו: "+((d.dead_threads||[]).join(", ")||"אין")+"   ·   תורים: "+(d.turns||0);
+    bempty.style.display=h.length?"none":"block";
+    blist.textContent="";
+    h.slice().reverse().forEach(function(x){
+      var li=document.createElement("li"),n=document.createElement("span"),t=document.createElement("span");
+      n.className="tn";n.textContent="#"+x.turn;
+      t.textContent=x.directive;
+      t.className=/המשיכי/.test(x.directive)?"quiet":"act";
+      li.appendChild(n);li.appendChild(t);blist.appendChild(li);
+    });
+  }
+  function pollBrain(){
+    fetch(DIRECTOR_URL.replace(/\/$/,"")+"/latest").then(function(r){return r.json();}).then(renderBrain).catch(function(){});
+  }
+  function startBrain(){
+    if(!DIRECTOR_URL)return;
+    brain.classList.add("show");pollBrain();
+    brainTimer=setInterval(pollBrain,1500);
+  }
+  function stopBrain(){if(brainTimer){clearInterval(brainTimer);brainTimer=null;}}
+
   function stop(){
+    stopBrain();
     if(conv){try{conv.endSession();}catch(e){}}
     conv=null;orb.textContent="לחץ ודבר";orb.className="orb";orb.disabled=false;
     status.textContent="נבחרה: "+NAMES[chosen];setChips(false);
@@ -178,7 +226,7 @@
       return window.ElevenLabsClient.Conversation.startSession({
         agentId:AGENTS[chosen],connectionType:"webrtc",
         onConnect:function(){connecting=false;orb.disabled=false;orb.textContent="סיים";orb.className="orb on";
-          status.textContent=NAMES[chosen]+" — מחוברת";hint.textContent="חדר הבקרה פעיל. דבר, ואז סיים והחלף גרסה.";setChips(true);},
+          status.textContent=NAMES[chosen]+" — מחוברת";hint.textContent="חדר הבקרה פעיל. דבר, ואז סיים והחלף גרסה.";setChips(true);startBrain();},
         onDisconnect:function(){stop();},
         onModeChange:function(m){var md=m&&m.mode;
           if(md==="speaking"){orb.className="orb on talking";status.textContent=NAMES[chosen]+" מדברת";}

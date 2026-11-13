@@ -47,6 +47,7 @@ RUN IT:
 
 import os
 import re
+import time
 import requests
 from flask import Flask, request, jsonify
 
@@ -54,6 +55,10 @@ app = Flask(__name__)
 
 ANTHROPIC_API_KEY = os.environ.get("ANTHROPIC_API_KEY", "")
 ANALYST_MODEL = "claude-haiku-4-5"   # the SLOW brain is small on purpose
+# Optional shared secret. If set, POST /director must send header X-Director-Token.
+# Stops strangers from burning your Anthropic credit through the public URL.
+DIRECTOR_TOKEN = os.environ.get("DIRECTOR_TOKEN", "")
+LAST_CONV = {"id": None}              # most recent conversation, for the demo page
 
 # ---------------------------------------------------------------------------
 # STATE — in-memory, per conversation. Swap for a DB if it must survive restart.
@@ -67,6 +72,7 @@ def get_state(conv_id):
             "dead_threads": [],    # topics killed by 2x vague answers
             "facts_used": [],      # briefed facts already spent (max 2 total)
             "turns": 0,
+            "history": [],         # [{turn, directive, ts}] shown on the demo page
         }
     return STATE[conv_id]
 
@@ -189,6 +195,8 @@ def apply_updates(state, updates):
 # ---------------------------------------------------------------------------
 @app.route("/director", methods=["POST"])
 def director():
+    if DIRECTOR_TOKEN and request.headers.get("X-Director-Token", "") != DIRECTOR_TOKEN:
+        return jsonify({"error": "unauthorized"}), 401
     payload = request.get_json(force=True) or {}
     conv_id = payload.get("conversation_id", "default")
     transcript = payload.get("transcript", "") or ""
@@ -198,6 +206,10 @@ def director():
 
     directive, updates = call_analyst(transcript, state)
     apply_updates(state, updates)
+    state["history"].append({"turn": state["turns"], "directive": directive,
+                             "ts": int(time.time())})
+    state["history"] = state["history"][-30:]
+    LAST_CONV["id"] = conv_id
 
     print(f"[director] turn {state['turns']} | gender={state['gender']} "
           f"| dead={state['dead_threads']} | -> {directive}")
@@ -205,6 +217,27 @@ def director():
     # ElevenLabs stores this response; the live prompt reads {{directive}} as a
     # producer message for the next line.
     return jsonify({"directive": directive})
+
+
+@app.after_request
+def add_cors(resp):
+    # The demo page (GitHub Pages) reads /latest from the browser.
+    resp.headers["Access-Control-Allow-Origin"] = "*"
+    resp.headers["Access-Control-Allow-Headers"] = "Content-Type, X-Director-Token"
+    return resp
+
+
+@app.route("/latest", methods=["GET"])
+def latest():
+    """What the demo page polls: directives for one conversation (default: newest)."""
+    conv_id = request.args.get("conversation_id") or LAST_CONV["id"]
+    state = STATE.get(conv_id)
+    if not state:
+        return jsonify({"conversation_id": conv_id, "history": [], "gender": None,
+                        "dead_threads": [], "turns": 0})
+    return jsonify({"conversation_id": conv_id, "history": state["history"],
+                    "gender": state["gender"], "dead_threads": state["dead_threads"],
+                    "turns": state["turns"]})
 
 
 @app.route("/health", methods=["GET"])
@@ -215,4 +248,4 @@ def health():
 
 if __name__ == "__main__":
     print("Second brain on http://localhost:8787  (POST /director, GET /health)")
-    app.run(host="0.0.0.0", port=8787)
+    app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 8787)))
