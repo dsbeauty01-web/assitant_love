@@ -1,0 +1,268 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>סולמייט — איך היא בנויה</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Heebo:wght@200;300;400;500;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0a0908;--bg2:#120f0d;--panel:#15110e;--ink:#f4efe8;--dim:#a39a8f;--faint:#6b625a;
+    --line:rgba(244,239,232,.10);--amber:#e0a15e;--amber-deep:#b8763a;--live:#e0503c;
+    --emo:#7fa8c2;--sassy:#d96a9c;--ok:#7cc495;--warn:#e9a55a;
+    --sans:'Heebo',system-ui,sans-serif;--mono:'IBM Plex Mono',ui-monospace,monospace;color-scheme:dark;
+  }
+  *{box-sizing:border-box}html,body{margin:0;height:100%}
+  body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-weight:300;-webkit-font-smoothing:antialiased;
+    display:flex;flex-direction:column;min-height:100vh;
+    padding:max(14px,env(safe-area-inset-top)) max(16px,env(safe-area-inset-right)) max(14px,env(safe-area-inset-bottom)) max(16px,env(safe-area-inset-left))}
+  body::before{content:'';position:fixed;inset:0;pointer-events:none;
+    background:radial-gradient(ellipse 80% 50% at 50% -10%,rgba(224,161,94,.10),transparent 70%)}
+  .top{position:relative;display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;
+    font-family:var(--mono);font-size:10.5px;letter-spacing:.16em;color:var(--faint);padding-bottom:12px;border-bottom:1px solid var(--line)}
+  .rec{display:flex;align-items:center;gap:7px;color:var(--live)}
+  .dot{width:7px;height:7px;border-radius:50%;background:var(--live);animation:pulse 1.9s infinite}
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
+  main{position:relative;flex:1;display:flex;align-items:center;justify-content:center;padding:22px 0}
+  .stage{width:100%;max-width:980px}
+  .slide{display:flex;flex-direction:column;gap:22px;animation:in .45s ease}
+  .slide[hidden]{display:none}
+  @keyframes in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+  .k{font-family:var(--mono);font-size:11px;letter-spacing:.24em;color:var(--amber-deep);margin:0}
+  h1{margin:0;font-size:clamp(2.8rem,10vw,5.2rem);font-weight:200;letter-spacing:-.03em;line-height:1}
+  h2{margin:0;font-size:clamp(1.7rem,5vw,2.8rem);font-weight:200;letter-spacing:-.02em;line-height:1.15}
+  h1 em,h2 em{font-style:normal;color:var(--amber);font-weight:300}
+  .sub{margin:0;font-size:clamp(1.05rem,2.6vw,1.35rem);color:var(--dim);max-width:40ch;line-height:1.6}
+
+  .title{align-items:center;text-align:center}
+  .orb{width:150px;height:150px;border-radius:50%;
+    background:radial-gradient(circle at 38% 32%,#f0bd82,var(--amber-deep) 62%,#7d4a1f);
+    box-shadow:0 0 0 1px rgba(224,161,94,.35),0 0 70px rgba(224,161,94,.3);animation:breathe 3s ease-in-out infinite}
+  .orb.talk{animation:speak .8s ease-in-out infinite}
+  @keyframes breathe{0%,100%{box-shadow:0 0 0 1px rgba(224,161,94,.45),0 0 60px rgba(224,161,94,.25)}50%{box-shadow:0 0 0 1px rgba(224,161,94,.7),0 0 115px rgba(224,161,94,.45)}}
+  @keyframes speak{0%,100%{transform:scale(1)}50%{transform:scale(1.05)}}
+
+  /* flow diagram */
+  .flow{display:flex;align-items:stretch;gap:8px}
+  .node{flex:1;min-width:0;border:1px solid var(--line);border-radius:4px;background:var(--panel);padding:14px 12px;display:flex;flex-direction:column;gap:4px;text-align:center}
+  .node b{font-weight:500;font-size:1.02rem}
+  .node span{font-size:.82rem;color:var(--dim);line-height:1.45}
+  .node .tag{font-family:var(--mono);font-size:9.5px;letter-spacing:.12em;color:var(--faint);direction:ltr}
+  .node.brain{border-color:rgba(224,161,94,.55);background:rgba(224,161,94,.08)}
+  .node.brain b{color:var(--amber)}
+  .arr{display:flex;align-items:center;color:var(--amber-deep);font-size:1.3rem}
+  .side{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .feed{border:1px solid var(--line);border-radius:4px;padding:12px 14px;background:var(--bg2);display:flex;flex-direction:column;gap:3px;min-width:0}
+  .feed b{font-weight:500}.feed span{font-size:.85rem;color:var(--dim)}
+  .feed .via{font-family:var(--mono);font-size:10px;letter-spacing:.1em;color:var(--amber-deep)}
+  .feed.dashed{border-style:dashed}
+  .pill{align-self:flex-start;font-family:var(--mono);font-size:10px;letter-spacing:.08em;border:1px solid currentColor;border-radius:999px;padding:1px 8px}
+  .pill.w{color:var(--warn)}.pill.g{color:var(--ok)}
+
+  .rules{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:1px;background:var(--line);border:1px solid var(--line);border-radius:4px;overflow:hidden}
+  .rule{background:var(--bg2);padding:16px 18px;display:flex;flex-direction:column;gap:4px}
+  .rule b{font-weight:500;font-size:1.05rem}.rule span{font-size:.9rem;color:var(--dim)}
+  .duo{display:flex;gap:10px;flex-wrap:wrap}
+  .duo div{border:1px solid var(--line);border-radius:4px;padding:10px 16px;font-size:1.05rem}
+  .duo .e{color:var(--emo);border-color:rgba(127,168,194,.35)}.duo .s{color:var(--sassy);border-color:rgba(217,106,156,.35)}
+
+  .chain{display:flex;flex-direction:column;gap:10px}
+  .step{display:grid;grid-template-columns:120px 1fr;gap:14px;align-items:center;border:1px solid var(--line);border-radius:4px;padding:12px 16px;background:var(--panel)}
+  .step .l{font-family:var(--mono);font-size:10.5px;letter-spacing:.12em;color:var(--faint)}
+  .btnmock{display:inline-block;border:1px solid rgba(224,161,94,.45);color:var(--amber);border-radius:2px;padding:3px 12px;font-size:1rem}
+  .hidden-msg{font-family:var(--mono);font-size:.9rem;color:var(--dim)}
+  .line{font-size:1.15rem;color:var(--amber)}
+
+  .decide{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px}
+  .decide div{border:1px solid var(--line);border-radius:4px;padding:12px 14px;background:var(--panel);display:flex;flex-direction:column;gap:3px}
+  .decide b{font-weight:500}.decide span{font-size:.85rem;color:var(--dim)}
+  .decide .quiet{border-color:rgba(224,161,94,.4)}
+
+  .two{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .col{border:1px solid var(--line);border-radius:4px;padding:16px 18px;background:var(--panel);min-width:0}
+  .col h3{margin:0 0 10px;font-family:var(--mono);font-size:11px;letter-spacing:.16em;font-weight:500}
+  .col.g h3{color:var(--ok)}.col.w h3{color:var(--warn)}
+  .col ul{margin:0;padding-right:18px;display:flex;flex-direction:column;gap:7px;font-size:.98rem}
+  .col.w li{color:var(--dim)}
+
+  .cta{display:inline-flex;align-self:center;font-family:var(--mono);font-size:.9rem;color:var(--amber);border:1px solid rgba(224,161,94,.45);
+    border-radius:3px;padding:10px 16px;text-decoration:none;word-break:break-all;direction:ltr}
+  .cta:hover{background:rgba(224,161,94,.08)}
+
+  .cap{min-height:3.2em;text-align:center;font-size:.92rem;color:var(--dim);max-width:70ch;margin:0 auto;line-height:1.6}
+  .bar{position:relative;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;padding-top:12px;border-top:1px solid var(--line)}
+  .ctrl{display:flex;gap:8px;align-items:center}
+  button{font-family:var(--sans);font-size:.95rem;color:var(--ink);background:transparent;border:1px solid var(--line);border-radius:3px;padding:8px 14px;cursor:pointer}
+  button:hover{border-color:rgba(224,161,94,.5)}
+  button:focus-visible{outline:2px solid var(--amber);outline-offset:2px}
+  #play{background:var(--amber);color:#1a1006;border-color:var(--amber);font-weight:500}
+  .dots{display:flex;gap:6px}
+  .dots i{width:8px;height:8px;border-radius:50%;background:var(--line);cursor:pointer}
+  .dots i.on{background:var(--amber)}
+  .count{font-family:var(--mono);font-size:11px;color:var(--faint);font-variant-numeric:tabular-nums;direction:ltr;unicode-bidi:isolate}
+
+  @media (max-width:720px){
+    .flow{flex-direction:column}.arr{justify-content:center;transform:rotate(-90deg)}
+    .side,.two{grid-template-columns:1fr}
+    .step{grid-template-columns:1fr;gap:6px}
+  }
+  @media (prefers-reduced-motion:reduce){.orb,.orb.talk,.dot,.slide{animation:none}}
+</style>
+</head>
+<body>
+  <div class="top"><span class="rec"><span class="dot"></span>AI LOVE</span><span>סולמייט · איך היא בנויה</span></div>
+
+  <main><div class="stage">
+
+    <section class="slide title">
+      <div class="orb" id="orb1"></div>
+      <h1><em>סולמייט</em></h1>
+      <p class="sub">לא צ'אטבוט. מראיינת קולית חיה, בעברית, מול מצלמה.</p>
+    </section>
+
+    <section class="slide" hidden>
+      <p class="k">01 · המערכת</p>
+      <h2>איך זה <em>מחובר</em></h2>
+      <div class="flow">
+        <div class="node"><b>האורח מדבר</b><span>מיקרופון בדפדפן</span></div>
+        <div class="arr">←</div>
+        <div class="node"><b>אוזניים</b><span>קול הופך לטקסט</span><span class="tag">ELEVENLABS</span></div>
+        <div class="arr">←</div>
+        <div class="node brain"><b>המוח החי</b><span>מודל שפה + שיטת הראיון. מחליט מה להגיד.</span><span class="tag">ANTHROPIC LLM</span></div>
+        <div class="arr">←</div>
+        <div class="node"><b>קול</b><span>קול עברי טבעי</span><span class="tag">ELEVENLABS</span></div>
+        <div class="arr">←</div>
+        <div class="node"><b>האורח שומע</b><span>2–4 שניות לסיבוב</span></div>
+      </div>
+      <div class="side">
+        <div class="feed"><span class="via">↑ ערוץ הקשר אל המוח</span><b>חדר בקרה</b><span>מפיק לוחץ על כפתור, הודעה סמויה נכנסת לשיחה.</span><span class="pill g">פעיל</span></div>
+        <div class="feed dashed"><span class="via">↑ הנחיה בכל תור</span><b>מוח שני · מפיק שקט</b><span>קורא את כל השיחה ומחליט מתי להתערב.</span><span class="pill w">נבנה · לא מחובר עדיין</span></div>
+      </div>
+    </section>
+
+    <section class="slide" hidden>
+      <p class="k">02 · המוח החי</p>
+      <h2>לא רק מודל. <em>שיטת עבודה.</em></h2>
+      <div class="rules">
+        <div class="rule"><b>משאירה שקט</b><span>הרבה תשובות הן אבחנה קצרה, לא שאלה.</span></div>
+        <div class="rule"><b>תופסת את המילה</b><span>המילה שהאורח נשען עליה, חוזרת אליו חדה יותר.</span></div>
+        <div class="rule"><b>עוזבת נושא מת</b><span>שתי תשובות "לא יודע", והיא ממשיכה הלאה.</span></div>
+        <div class="rule"><b>רכה כשכואב</b><span>קצר, שקט, בלי שאלת המשך.</span></div>
+      </div>
+      <div class="duo"><div class="e">רגשית</div><div class="s">סאסית</div></div>
+      <p class="sub" style="font-size:1rem">שתי אישיויות, אותה ליבה.</p>
+    </section>
+
+    <section class="slide" hidden>
+      <p class="k">03 · ערוץ הקשר</p>
+      <h2>חדר הבקרה <em>מכוון בזמן אמת</em></h2>
+      <div class="chain">
+        <div class="step"><span class="l">המפיק לוחץ</span><span><span class="btnmock">העלי מתח</span></span></div>
+        <div class="step"><span class="l">ערוץ צדדי</span><span class="hidden-msg">[במאי] העלי מתח. הגרסה הקשה יותר.</span></div>
+        <div class="step"><span class="l">המשפט הבא</span><span class="line">"אתה יודע. פשוט עוד לא אמרת את זה בקול."</span></div>
+      </div>
+      <p class="sub" style="font-size:1rem">האורח לא שומע כלום. השורה האחרונה היא ציטוט אמיתי מבדיקה.</p>
+    </section>
+
+    <section class="slide" hidden>
+      <p class="k">04 · המוח השני</p>
+      <h2>מפיק שקט <em>שקורא הכל</em></h2>
+      <p class="sub">בכל תור הוא קורא את כל השיחה ומוציא הנחיה אחת לכל היותר.</p>
+      <div class="decide">
+        <div class="quiet"><b>שקט</b><span>רוב התורות. לא מתערב.</span></div>
+        <div><b>נעילת מגדר</b><span>פעם אחת, מהפועל הראשון של האורח.</span></div>
+        <div><b>נושא מת</b><span>להעלות לנושא גדול יותר, ולא לחזור.</span></div>
+        <div><b>חקירה</b><span>לעצור שאלות ברצף, לתת לרגע לשבת.</span></div>
+        <div><b>רגש</b><span>להוריד לחץ.</span></div>
+      </div>
+      <span class="pill w">הקוד כתוב · עוד לא מחובר לשידור</span>
+    </section>
+
+    <section class="slide" hidden>
+      <p class="k">05 · בדיקה</p>
+      <h2>מה בדקנו, <em>ומה עוד פתוח</em></h2>
+      <div class="two">
+        <div class="col g"><h3>עובד בבדיקות</h3><ul>
+          <li>עברית לאורך כל השיחה.</li>
+          <li>פנייה בלשון הנכונה לאורח.</li>
+          <li>עוזבת נושא מת.</li>
+          <li>רכה כשכואב.</li>
+          <li>מגיבה לכפתורי הבמאי.</li>
+        </ul></div>
+        <div class="col w"><h3>עוד פתוח</h3><ul>
+          <li>איטית: 2–4 שניות לתשובה.</li>
+          <li>לפעמים מניחה פרט שלא נאמר.</li>
+          <li>לא נבדקה עם אורחת.</li>
+          <li>עוד לא היו אורחים אמיתיים או צילום.</li>
+        </ul></div>
+      </div>
+      <p class="sub" style="font-size:1rem">סימולציות עם אורח מדומה ובודק אוטומטי שנותן ציון לכל שיחה.</p>
+    </section>
+
+    <section class="slide title" hidden>
+      <div class="orb" id="orb7"></div>
+      <h2>הליבה <em>מתחילה להיות יציבה</em></h2>
+      <p class="sub">תשתית לשיחה חכמה עם אנשים, לא רק לתוכנית אחת.</p>
+      <a class="cta" href="brief.html">נסו בעצמכם ←</a>
+    </section>
+
+  </div></main>
+
+  <p class="cap" id="cap"></p>
+  <div class="bar">
+    <div class="ctrl">
+      <button id="play" type="button">▶ הפעל עם קול</button>
+      <button id="prev" type="button" aria-label="הקודם">→</button>
+      <button id="next" type="button" aria-label="הבא">←</button>
+    </div>
+    <div class="dots" id="dots"></div>
+    <span class="count" id="count"></span>
+  </div>
+
+<script>
+(function(){
+  "use strict";
+  var CAP=[
+    "שלום, אני סולמייט. אני לא צ'אטבוט. אני מראיינת אנשים בקול, בעברית, מול מצלמה. בדקות הקרובות אסביר איך אני בנויה.",
+    "ככה זה עובד. האורח מדבר, והמערכת של ElevenLabs הופכת את הקול שלו לטקסט. המוח שלי, מודל שפה של Anthropic, מחליט מה להגיד. ואז הקול שלי חוזר אליו, בעברית. כל הסיבוב הזה לוקח בין שתיים לארבע שניות.",
+    "המוח שלי הוא לא רק מודל. הוא שיטת עבודה של מראיינים טובים, שהפכנו לכללים. אני משאירה שקט, תופסת את המילה שהאורח נשען עליה, עוזבת נושא מת, ויורדת לטון רך כשכואב. יש לי שתי אישיויות, רגשית וסאסית, על אותה ליבה.",
+    "מעליי יש חדר בקרה. מפיק לוחץ על כפתור, למשל העלי מתח, והודעה סמויה נכנסת לשיחה דרך ערוץ צדדי. המשפט הבא שלי משתנה בהתאם, והאורח לא שומע שום דבר.",
+    "השלב הבא הוא מוח שני. מפיק שקט שקורא את כל השיחה, ובכל תור מחליט אם להתערב. רוב הזמן הוא שותק. הוא נועל את המגדר של האורח, מזהה נושא מת, ועוצר אותי כשאני מתחילה לחקור. הקוד כבר כתוב, אבל הוא עוד לא מחובר לשידור.",
+    "בדקנו אותי בסימולציות, עם אורח מדומה ובודק אוטומטי שנותן ציון לכל שיחה. אני מחזיקה עברית, פונה לאורח בלשון הנכונה, עוזבת נושא מת, ונרגעת כשכואב. מה שעוד פתוח: אני איטית, לפעמים מניחה פרט שלא נאמר, ועוד לא פגשתי אורחים אמיתיים.",
+    "הליבה שלי מתחילה להיות יציבה. אני תשתית לשיחה חכמה עם אנשים, לא רק לתוכנית אחת. נסו אותי בעצמכם, בלינק שבשקף."
+  ];
+  var slides=[].slice.call(document.querySelectorAll(".slide")), n=slides.length, i=0, playing=false;
+  var audio=new Audio(), playBtn=document.getElementById("play"), cap=document.getElementById("cap"),
+      dots=document.getElementById("dots"), count=document.getElementById("count");
+  audio.preload="auto";
+  slides.forEach(function(_,k){var d=document.createElement("i");d.addEventListener("click",function(){go(k,playing);});dots.appendChild(d);});
+  function orbs(on){[].forEach.call(document.querySelectorAll(".orb"),function(o){o.classList.toggle("talk",on);});}
+  function go(k,speak){
+    i=Math.max(0,Math.min(n-1,k));
+    slides.forEach(function(s,j){s.hidden=j!==i;});
+    [].forEach.call(dots.children,function(d,j){d.classList.toggle("on",j===i);});
+    count.textContent=(i+1)+" / "+n; cap.textContent=CAP[i];
+    audio.pause();
+    if(speak){audio.src="deck/"+(i+1)+".mp3";audio.currentTime=0;
+      audio.play().then(function(){orbs(true);}).catch(function(){stop();});}
+  }
+  function stop(){playing=false;audio.pause();orbs(false);playBtn.textContent="▶ הפעל עם קול";}
+  audio.addEventListener("ended",function(){orbs(false);
+    if(playing&&i<n-1){setTimeout(function(){go(i+1,true);},700);} else stop();});
+  playBtn.addEventListener("click",function(){
+    if(playing){stop();return;}
+    playing=true;playBtn.textContent="❚❚ עצור";go(i===n-1?0:i,true);
+  });
+  document.getElementById("next").addEventListener("click",function(){go(i+1,playing);});
+  document.getElementById("prev").addEventListener("click",function(){go(i-1,playing);});
+  document.addEventListener("keydown",function(e){
+    if(e.key==="ArrowLeft")go(i+1,playing); else if(e.key==="ArrowRight")go(i-1,playing);
+    else if(e.key===" "){e.preventDefault();playBtn.click();}
+  });
+  go(0,false);
+})();
+</script>
+</body>
+</html>
